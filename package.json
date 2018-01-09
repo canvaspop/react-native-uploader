@@ -1,10 +1,10 @@
 {
-  "name": "react-native-uploader",
+  "name": "es-react-native-uploader",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aroth/react-native-uploader.git"
+    "url": "git+https://github.com/ryanvanbelkum/react-native-uploader.git"
   },
-  "version": "0.0.10",
+  "version": "0.0.12",
   "description": "A React Native module to upload files and camera roll assets. Supports progress notification.",
   "author": {
     "name": "Adam Roth",
@@ -23,9 +23,9 @@
     "file"
   ],
   "bugs": {
-    "url": "https://github.com/aroth/react-native-uploader/issues"
+    "url": "https://github.com/ryanvanbelkum/react-native-uploader/issues"
   },
-  "homepage": "https://github.com/aroth/react-native-uploader#readme",
+  "homepage": "https://github.com/ryanvanbelkum/react-native-uploader#readme",
   "maintainers": [
     {
       "name": "aroth",
