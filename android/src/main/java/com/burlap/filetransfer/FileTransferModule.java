@@ -41,8 +41,7 @@ public class FileTransferModule extends ReactContextBaseJavaModule {
 
     @Override
     public String getName() {
-        // match up with the IOS name
-        return "FileTransfer";
+        return "RNUploader";
     }
 
     @ReactMethod
