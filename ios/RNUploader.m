@@ -2,6 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <UIKit/UIKit.h>
+#import <Accelerate/Accelerate.h>
 
 #import <React/RCTBridgeModule.h>
 #import "RCTEventDispatcher.h"
@@ -151,12 +152,13 @@ RCT_EXPORT_METHOD(upload:(NSDictionary *)obj callback:(RCTResponseSenderBlock)ca
                 }else if([MIMEType rangeOfString:@"image" options:NSRegularExpressionSearch].location != NSNotFound){
 
                     CGImageRef fullScreenImageRef = [rep fullScreenImage];
-                    UIImage *image = [UIImage imageWithCGImage:fullScreenImageRef];
+                    UIImage *image = [self _square_resize: fullScreenImageRef];
 
+                    //[UIImage imageWithCGImage:fullScreenImageRef];
+
+                    //always send jpeg
                     NSData *jpgImageData = UIImageJPEGRepresentation(image, 0.7);
-                    UIImage *imageObj = [UIImage imageWithData:jpgImageData];
-
-                   _file[@"data"] = UIImagePNGRepresentation(imageObj);
+                   _file[@"data"] = jpgImageData;
                 }
 
                 dispatch_group_leave(self.fgroup);
@@ -181,6 +183,52 @@ RCT_EXPORT_METHOD(upload:(NSDictionary *)obj callback:(RCTResponseSenderBlock)ca
         }
     }
 
+}
+
+- (UIImage *)_square_resize: (CGImageRef)fullImage {
+    vImage_Buffer sourceBuffer;//, destBuffer;
+    vImage_Error error;
+    vImage_CGImageFormat format = {
+        .bitsPerComponent = 8,
+        .bitsPerPixel = 32,
+        .colorSpace = NULL,
+        .bitmapInfo = (CGBitmapInfo)kCGImageAlphaFirst,
+        .version = 0,
+        .decode = NULL,
+        .renderingIntent = kCGRenderingIntentDefault
+    };
+
+    void *pixelBuffer;
+    pixelBuffer = (uint8_t*)calloc(750 * 750 * 4, sizeof(uint8_t));
+
+    error = vImageBuffer_InitWithCGImage(&sourceBuffer, &format, NULL, fullImage, kvImageNoFlags);
+
+    vImage_Buffer destBuffer = {
+        .height = 750,
+        .width = 750,
+        .data = pixelBuffer,
+        .rowBytes = 4 * 750
+    };
+
+    error = vImageScale_ARGB8888(
+                                 &sourceBuffer,
+                                 &destBuffer,
+                                 NULL,
+                                 kvImageHighQualityResampling
+                                );
+    if (error) {
+        NSLog(@"error from resize %ld", error);
+    }
+
+    free(sourceBuffer.data);
+
+    CGImageRef imageRef = vImageCreateCGImageFromBuffer(&destBuffer, &format, NULL, NULL, kvImageNoFlags, &error);
+    UIImage *returnImage = [UIImage imageWithCGImage:imageRef];
+
+    free(pixelBuffer);
+    CGImageRelease(imageRef);
+
+    return returnImage;
 }
 
 - (void)appendFiles {
